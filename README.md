@@ -42,7 +42,7 @@ BetterImage component
 
 `<BetterImage>`
 
-`<App>
+```<App>
 	<ImageList />
 </App>
 
@@ -54,7 +54,7 @@ BetterImage component
 		</BetterImage>
 	})
 </ImageList>
-`
+```
 
 ## 3 Advanced Guides
 

@@ -5,17 +5,6 @@ import bigJPGImage from './images/bigJPG.jpg'
 import bigPNGImage from './images/bigPNG.png'
 
 class App extends Component {
-  constructor(props){
-    super(props)
-    this.state = {
-      once: false,
-    }
-    this.updateOnce = this.updateOnce.bind(this);
-  }
-
-  updateOnce(){
-    this.setState({once: true});
-  }
 
   render() { 
     return (
@@ -25,8 +14,6 @@ class App extends Component {
           resize={'200x200'}
           format={'webp'}
           quality={'10'}
-          instance={this.state.once}
-          instanceFunc={this.updateOnce}
         />
       </div>
     );
