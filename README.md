@@ -12,6 +12,9 @@ This is advantageous for developers for several reasons:
 
 BetterImage was created to facilitate the use of images in React applications. At the core, we want to bring a 
 
+COVID19 forced businesses to convert to have online presence. This is 
+Existing NPM packages are not delivery friendly. 
+
 Users use phones to surf the web, but some Images are not optimized. That means sizes like 2000x2000 pixel images are only getting displayed 100x100 pixel.
 
 99.7 % of images don't use modern image formats like WebP which is 30% smaller than JPEG

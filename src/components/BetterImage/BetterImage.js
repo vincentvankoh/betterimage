@@ -13,7 +13,7 @@ export default class BetterImage extends React.Component {
       imageName: '',
       resizedImageHeight: 0,
       resizedImageWidth: 0,
-      finalState:''
+      finalState: ''
     }
     this.updateOnce = this.updateOnce.bind(this);
     this.importAll = this.importAll.bind(this);
@@ -45,6 +45,7 @@ export default class BetterImage extends React.Component {
     let arr2 = firstString.split('');
     let secondDot = arr2.indexOf('.');
     let substring2 = arr2.join('').substring(0, secondDot);
+    console.log(substring2);
     return substring2;
   }
 
@@ -70,8 +71,8 @@ export default class BetterImage extends React.Component {
   }
 
   ////////////////* Convert Image Format to WEBP Functionality */////////////////
-  convertImg(source, quality){
-    let imageName = this.extractName(source);
+  convertImg(quality){
+    let imageName = this.state.imageName;
     
     if(this.state.once === false){
       
@@ -107,29 +108,39 @@ export default class BetterImage extends React.Component {
 
 
 ///////////////////* CHAINING the APIs Together */////////////////////
-  componentDidMount(){
-    this.setState({imageName: this.extractName(this.state.source)})
-    this.setState({images: this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))})
-    if(this.state.once === false){
-      this.setState({once: true});
-      this.convertImg(this.state.source, this.state.quality)
-    }
-  }
+  // before render
+    // componentWillMount was here
 
-  shouldComponentUpdate(nextProps, nextState){
-    return this.state.value != nextState.value;
+  componentDidMount() {
+    console.log("sourceName", this.state.source)
+    const newName = this.extractName(this.state.source);
+    console.log("newName", newName) // working
+
+    console.log("pre-state", this.state)
+    console.log("pre-imageName", this.state.imageName)
+    this.setState({imageName: newName},()=>console.log('State imageName updated', this.state.imageName)) // not working?
+    console.log("post-imageName", this.state.imageName)
+
+    const images = this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/));
+    this.setState({images: images})
+    if(this.state.once === false){
+      this.setState({once: true}, ()=>console.log('State once updated', this.state.imageName));
+      this.convertImg(this.state.source, this.state.quality)
+      let finalComponent = <img src={this.state.images[`${this.state.imgName}.webp`]} style={{width: `${this.state.resizedImageWidth}px`, height: `${this.state.resizedImageHeight}px`}} alt="image failed to load"/>;
+      this.setState({finalState: finalComponent})
   }
+}
 
   ////////////////////* Render the modifed image component */////////////////////
   render(){
-    let renderingComponent = (
-      <img src={this.state.images[`${this.state.imgName}.webp`]} style={{width: `${this.state.resizedImageWidth}px`, height: `${this.state.resizedImageHeight}px`}} alt="image failed to load"/>
-    )
-
+    console.log("RENDER imageName", this.state.imgName)
+    console.log("RENDER imageDirectory", this.state.images)
+    console.log("RENDER finalState", this.state.finalState)
+    
     return (
       <div>
-        {console.log("rendering", this.state.once)}
-        {renderingComponent}
+        {console.log("RENDERED ONCE", this.state.once)}
+        {this.state.finalState}
       </div>
     )
   }
