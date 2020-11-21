@@ -12,7 +12,8 @@ export default class BetterImage extends React.Component {
       quality: this.props.quality,
       extension: this.props.source.split('/').pop().split('.').pop().split('.').shift(),
       fetched: false,
-      dataOk: false
+      dataOk: false,
+      resultComponent: this.props.defaultImage
     }
     this.importAll = this.importAll.bind(this);
     this.fetchData = this.fetchData.bind(this);
@@ -59,6 +60,7 @@ export default class BetterImage extends React.Component {
   }
 
   fetchData() {
+    this.setState({...this.state, fetched: true})
     if(this.state.fetched === false ){
       console.log("fetching....")
       fetch('/api/convert', {
@@ -73,31 +75,22 @@ export default class BetterImage extends React.Component {
       }).then((data) => {
         let result = data.json();
         console.log("data status from backend", data["ok"])
-        if(data["ok"] === true && this.state.dataOk === false) {
-          this.setState( { ...this.state, dataOk: true, fetched: true}, () => {console.log("fetched is true")})
+        if(this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))[[`${(this.state.imageName)}.webp`]] && data["ok"] === true && this.state.dataOk === false) {
+          let sourceRoute = this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))
+          this.setState( { ...this.state, dataOk: true, resultComponent: <RenderedImage sourceRoute={sourceRoute} />}, () => {console.log("fetched is true")})
         }
       })
-      .catch(
-        console.log("we are in catch")
-      )
+      .catch( console.log("we are in catch") )
     }
-    else{
-      console.log("I'm out of fetch")
-    }
+    else{ console.log("I'm out of fetch") }
   }
   
   render(){
-    let sourceRoutePath = this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/));
-    let sourceRoute = sourceRoutePath[[`${(this.state.imageName)}.webp`]];
-    let defaultImage = sourceRoutePath["default.png"];
-    // console.log("default Image", defaultImage.default)
-
-    // {console.log("rendered", this.state.fetched)}
-    // {console.log("source", this.state.source)}
-
+    console.log("this.fetched", this.state.fetched)
+    if(this.state.fetched === false ){this.fetchData()}
     return (
       <section>
-        { sourceRoute && this.state.dataOk === false ? <RenderedImage sourceRoute={sourceRoute} defaultImage={defaultImage} /> : this.fetchData()  }
+        {this.state.resultComponent}
       </section>
     );
   }

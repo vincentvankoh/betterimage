@@ -27,12 +27,6 @@ app.use((err, req, res, next) => {
   return res.status(errorObj.status).sendStatus(errorObj.message);
 });
 
-
-
-
-
-
-
 app.listen(PORT, () => {
   console.log(`server on port ${PORT}`)
 })
