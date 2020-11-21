@@ -3,7 +3,6 @@ import BetterImage from '../BetterImage/BetterImage.js';
 import originalImage from './images/bestPhotoEver.png';
 import bigPNG from "./images/bigPNG.png"
 
-
 class App extends Component {
 
   render() { 
