@@ -61,6 +61,7 @@ export default class BetterImage extends React.Component {
 
   fetchData() {
     this.setState({...this.state, fetched: true})
+    console.log("we are in fetch")
     if(this.state.fetched === false ){
       console.log("fetching....")
       fetch('/api/convert', {
