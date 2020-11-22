@@ -1,5 +1,6 @@
 import React from 'react';
 import RenderedImage from './RenderedImage.js';
+import Loading from "./Loading.js";
 
 export default class BetterImage extends React.Component {
   constructor(props){
@@ -7,16 +8,19 @@ export default class BetterImage extends React.Component {
     this.state = {
       resize: this.props.resize,
       source: this.props.source,
-      imageName: this.props.source.split("/").pop().replace(/\.(.*)\.(.*)/, ""),
+      imageName: '',
       format: this.props.format,
       quality: this.props.quality,
       extension: this.props.source.split('/').pop().split('.').pop().split('.').shift(),
       fetched: false,
       dataOk: false,
-      resultComponent: this.props.defaultImage
+      webpFile: false,
+      sourceRoute: '',
+      resultComponent: ''
     }
     this.importAll = this.importAll.bind(this);
     this.fetchData = this.fetchData.bind(this);
+    this.renderFinal = this.renderFinal.bind(this);
     // this.convertedImg = this.convertedImg.bind(this);
     // this.extractName = this.extractName.bind(this);
   }
@@ -59,39 +63,58 @@ export default class BetterImage extends React.Component {
     return images;
   }
 
-  fetchData() {
-    this.setState({...this.state, fetched: true})
-    console.log("we are in fetch")
+  async fetchData() {
     if(this.state.fetched === false ){
       console.log("fetching....")
-      fetch('/api/convert', {
+      await fetch('/api/convert', {
         method: 'POST',
         headers: {
            'Content-Type': 'application/json' 
            },
           body: JSON.stringify({
-            imageName: this.state.imageName,
+            imageName: this.state.source.split("/").pop().replace(/\.(.*)\.(.*)/, ""),
             quality: this.state.quality,
           })
       }).then((data) => {
         let result = data.json();
         console.log("data status from backend", data["ok"])
-        if(this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))[[`${(this.state.imageName)}.webp`]] && data["ok"] === true && this.state.dataOk === false) {
-          let sourceRoute = this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))
-          this.setState( { ...this.state, dataOk: true, resultComponent: <RenderedImage sourceRoute={sourceRoute} />}, () => {console.log("fetched is true")})
+        // set state after image is available
+        if( data["ok"] === true ) {
+          // set state
+          this.setState( { ...this.state, fetched: true, sourceRoute: this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/)), webpFile: this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))[`${this.state.imageName}.webp`], dataOk: true}, () => {
+            console.log("fetched is true", this.state)
+          }) // callback
         }
       })
-      .catch( console.log("we are in catch") )
+      .catch( console.log("in catch") )
     }
     else{ console.log("I'm out of fetch") }
   }
+
+  async enterHere(){
+      console.log("in enterHere")
+      // fetch once
+      await this.fetchData()
+  }
+
+  async renderFinal() {
+    console.log("in renderFinal")
+    return <RenderedImage sourceRoute={this.state.webpFile} />
+  }
+
+  componentDidMount(){
+    { this.state.webpFile ? this.renderFinal() : this.enterHere()}
+  }
   
   render(){
-    console.log("this.fetched", this.state.fetched)
-    if(this.state.fetched === false ){this.fetchData()}
+    console.log("in render")
+    if(this.state.fetched){
+      return <RenderedImage sourceRoute={this.state.webpFile} />
+    }
     return (
       <section>
-        {this.state.resultComponent}
+        {console.log("in return")}
+        <Loading />
       </section>
     );
   }
