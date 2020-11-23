@@ -14,15 +14,12 @@ export default class BetterImage extends React.Component {
       extension: this.props.source.split('/').pop().split('.').pop().split('.').shift(),
       fetched: false,
       dataOk: false,
-      webpFile: false,
       sourceRoute: '',
-      resultComponent: ''
+      resultComponent: '',
     }
     this.importAll = this.importAll.bind(this);
     this.fetchData = this.fetchData.bind(this);
     this.renderFinal = this.renderFinal.bind(this);
-    // this.convertedImg = this.convertedImg.bind(this);
-    // this.extractName = this.extractName.bind(this);
   }
 
 
@@ -58,6 +55,7 @@ export default class BetterImage extends React.Component {
 
   ////////////////////* import all images in optimized folder */////////////////////
   importAll(r) {
+    console.log("in import All")
     let images = {};
     r.keys().map((item) => { images[item.replace('./', '')] = r(item); });
     return images;
@@ -66,7 +64,7 @@ export default class BetterImage extends React.Component {
   async fetchData() {
     if(this.state.fetched === false ){
       console.log("fetching....")
-      await fetch('/api/convert', {
+      fetch('/api/convert', {
         method: 'POST',
         headers: {
            'Content-Type': 'application/json' 
@@ -76,19 +74,18 @@ export default class BetterImage extends React.Component {
             quality: this.state.quality,
           })
       }).then((data) => {
-        let result = data.json();
         console.log("data status from backend", data["ok"])
         // set state after image is available
         if( data["ok"] === true ) {
           // set state
-          this.setState( { ...this.state, fetched: true, sourceRoute: this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/)), webpFile: this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/))[`${this.state.imageName}.webp`], dataOk: true}, () => {
+          this.setState( { ...this.state, imageName: this.state.source.split("/").pop().replace(/\.(.*)\.(.*)/, ""), fetched: true, sourceRoute: this.importAll(require.context('./convertedImage', false, /\.(png|jpe?g|webp|svg)$/)), dataOk: true}, () => {
             console.log("fetched is true", this.state)
           }) // callback
         }
       })
       .catch( console.log("in catch") )
     }
-    else{ console.log("I'm out of fetch") }
+    else{ console.log("I'm out of fetch when re-entered") }
   }
 
   async enterHere(){
@@ -98,23 +95,23 @@ export default class BetterImage extends React.Component {
   }
 
   async renderFinal() {
-    console.log("in renderFinal")
-    return <RenderedImage sourceRoute={this.state.webpFile} />
+    console.log("in renderFinal", this.state.sourceRoute)
+    return <RenderedImage sourceRoute={this.state.sourceRoute[`${this.state.imageName}.webp`]} />
   }
 
   componentDidMount(){
-    { this.state.webpFile ? this.renderFinal() : this.enterHere()}
+    this.enterHere()
   }
   
   render(){
-    console.log("in render")
-    if(this.state.fetched){
-      return <RenderedImage sourceRoute={this.state.webpFile} />
-    }
+    console.log("in render", this.state.sourceRoute)
+    let finalRender = this.state.sourceRoute[`${this.state.imageName}.webp`];
+
     return (
       <section>
-        {console.log("in return")}
-        <Loading />
+        {console.log("in return", this.state.sourceRoute[`${this.state.imageName}.webp`])}
+
+        {finalRender ? <RenderedImage sourceRoute={finalRender} /> : <Loading />}
       </section>
     );
   }
